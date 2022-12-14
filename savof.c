@@ -1,5 +1,6 @@
-/* savof v0.9 (May 2016)
- * Copyright (C) 2016 Norbert de Jonge <mail@norbertdejonge.nl>
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+/* savof v1.0 (December 2022)
+ * Copyright (C) 2016-2022 Norbert de Jonge <nlmdejonge@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -40,8 +41,8 @@
 
 /*========== Defines ==========*/
 #define PROGRAM_NAME "savof"
-#define PROGRAM_VERSION "v0.9 (May 2016)"
-#define COPYRIGHT "Copyright (C) 2016 Norbert de Jonge"
+#define PROGRAM_VERSION "v1.0 (December 2022)"
+#define COPYRIGHT "Copyright (C) 2022 Norbert de Jonge"
 #define SAV_FILE "PRINCE.SAV"
 #define HOF_FILE "PRINCE.HOF"
 #define EXIT_NORMAL 0
@@ -51,12 +52,16 @@
 #define MAX_DATA 720
 #define MAX_NAME 25
 #define MAX_OPTION 100
-#define SCREEN_WIDTH 960
-#define SCREEN_HEIGHT 540
+#define WINDOW_WIDTH 960
+#define WINDOW_HEIGHT 540
 #define NUM_SOUNDS 20
 #define REFRESH 30
 #define MAX_TEXT 500
-#define NO_WRAP 0
+/* The 100000 is a workaround for 0 being broken. SDL devs have fixed that
+ * see e.g. https://hg.libsdl.org/SDL_ttf/rev/72b8861dbc01 but
+ * Ubuntu et al. still ship older sdl2-ttf versions.
+ */
+#define NO_WRAP 100000
 #define MAX_TOWRITE 720
 #define MAX_HEX 100
 #define MAX_TIME 20
@@ -492,7 +497,7 @@ void InitScreen (void)
 
 	window = SDL_CreateWindow (PROGRAM_NAME " " PROGRAM_VERSION,
 		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-		SCREEN_WIDTH, SCREEN_HEIGHT, iFullscreen);
+		WINDOW_WIDTH, WINDOW_HEIGHT, iFullscreen);
 	if (window == NULL)
 	{
 		printf ("[FAILED] Unable to create a window: %s!\n", SDL_GetError());
@@ -508,7 +513,7 @@ void InitScreen (void)
 	SDL_SetHint (SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
 	if (iFullscreen != 0)
 	{
-		SDL_RenderSetLogicalSize (screen, SCREEN_WIDTH, SCREEN_HEIGHT);
+		SDL_RenderSetLogicalSize (screen, WINDOW_WIDTH, WINDOW_HEIGHT);
 	}
 
 	if (TTF_Init() == -1)
@@ -575,7 +580,7 @@ void InitScreen (void)
 		{
 			switch (event.type)
 			{
-				case SDL_KEYDOWN: /*** http://wiki.libsdl.org/SDL_Keycode ***/
+				case SDL_KEYDOWN: /*** https://wiki.libsdl.org/SDL2/SDL_Keycode ***/
 					switch (event.key.keysym.sym)
 					{
 						case SDLK_f:
@@ -888,7 +893,7 @@ void ShowScreen (void)
 	char sText[MAX_TEXT + 2];
 	int iEntry, iChar;
 	char sTemp[MAX_TOWRITE + 2];
-	char sTime[MAX_TIME + 2];
+	char sTime[MAX_TEXT + 2]; /*** Do NOT use MAX_TIME here. ***/
 	int iY;
 	SDL_Color color;
 
@@ -905,7 +910,7 @@ void ShowScreen (void)
 	char sShowHOF[MAX_TOWRITE + 2];
 
 	/*** background ***/
-	ShowImage (1, 1, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+	ShowImage (1, 1, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	/*** input ***/
 	if (iInput != 0)
@@ -1080,8 +1085,8 @@ void Zoom (void)
 			else { iFullscreen = 0; }
 
 	SDL_SetWindowFullscreen (window, iFullscreen);
-	SDL_SetWindowSize (window, SCREEN_WIDTH, SCREEN_HEIGHT);
-	SDL_RenderSetLogicalSize (screen, SCREEN_WIDTH, SCREEN_HEIGHT);
+	SDL_SetWindowSize (window, WINDOW_WIDTH, WINDOW_HEIGHT);
+	SDL_RenderSetLogicalSize (screen, WINDOW_WIDTH, WINDOW_HEIGHT);
 	TTF_CloseFont (font1);
 	TTF_CloseFont (font2);
 	TTF_CloseFont (font3);
@@ -1123,7 +1128,7 @@ void PlaySound (char *sFile)
 
 	if (sounds[iIndex].data)
 	{
-		free(sounds[iIndex].data);
+		free (sounds[iIndex].data);
 	}
 	SDL_LockAudio();
 	sounds[iIndex].data = cvt.buf;
