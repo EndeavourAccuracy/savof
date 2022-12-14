@@ -1,0 +1,11 @@
+# Executables.
+/savof
+/savof.exe
+
+# Created by IDE's.
+/savof.dev
+/savof.ico
+/savof.layout
+/savof.o
+/*private*
+/Makefile.win
